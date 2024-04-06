@@ -100,20 +100,6 @@ def show():
         return jsonify({'Error':'Failed to retrieve data'}), 400
 
 ##Register~~~~~~~~~~~~~~~
-@gehomeServer.route('/Register', methods=['POST'])
-def Register() :
-    data = request.get_json()
-    username = data['username']
-    password = data['password']
-    password_hash = generate_password_hash(password)
-
-    try:
-        df = pd.DataFrame(data)
-        df.to_sql('users', con=engine, if_exists='append', index=False)
-        return jsonify({'message':'User registered successfully'}), 201
-    except SQLAlchemyError as e:  # 捕获 SQLAlchemy 相关的异常
-        # 这里可以添加日志记录 log.error(e)
-        return jsonify({'error': 'Failed to register user'}), 500
 
 
 
