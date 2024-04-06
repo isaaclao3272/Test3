@@ -5,6 +5,8 @@ import pandas as pd
 import mysql.connector
 from sqlalchemy import create_engine
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.security import generate_password_hash
 import os
 
 db_config = {
@@ -39,7 +41,7 @@ def excuteCon(sql,args=None):
         with connection.cursor(dictionary=True) as cursor:
             cursor.execute(sql, args)
             data = cursor.fetchall()
-    except mysql.conector.Error as err:
+    except mysql.connector.Error as err:
         print(f"Query execution error: {err}")
     finally:
         connection.close()
@@ -52,10 +54,25 @@ ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+#updateCell~~~~~~~~~~~~~~~~~
 
-@gehomeServer.route('/')
+@gehomeServer.route('/updateCell', methods = ['PUT'])
+def updateCell():
+    data= request.get_json().get('data' , None)
+    if data: 
+        df = pd.DataFrame(data)
+        df.to_sql('members2', con= engine, if_exists='replace', index=False)
+        return jsonify({'Message': 'Data updated successfully'}), 200
+    else:
+        return jsonify({'Error': 'No data provided'}), 400
+    
+#First page ~~~~~~~~~~~~~~~~~~
+
+@gehomeServer.route('/', methods = ['GET'])
 def homPage():
     return '連接成功'
+
+#Upload~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @gehomeServer.route('/upload', methods = ['POST'])
 def upLoadFile():
@@ -71,6 +88,41 @@ def upLoadFile():
     return jsonify({'Message': 'File uploaded and processed successfully'}), 200
 
 
+# SHOW TABLE~~~~~~~~~~~~~~~~~~
+
+@gehomeServer.route('/showData', methods=["POST"])
+def show():
+    sql= ('SELECT * FROM members2')
+    data=excuteCon(sql)
+    if data:
+        return jsonify(data)
+    else:
+        return jsonify({'Error':'Failed to retrieve data'}), 400
+
+##Register~~~~~~~~~~~~~~~
+@gehomeServer.route('/Register', methods=['POST'])
+def Register() :
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    password_hash = generate_password_hash(password)
+
+    try:
+        df = pd.DataFrame(data)
+        df.to_sql('users', con=engine, if_exists='append', index=False)
+        return jsonify({'message':'User registered successfully'}), 201
+    except SQLAlchemyError as e:  # 捕获 SQLAlchemy 相关的异常
+        # 这里可以添加日志记录 log.error(e)
+        return jsonify({'error': 'Failed to register user'}), 500
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     gehomeServer.run(debug=True)
-
