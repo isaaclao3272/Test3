@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import pandas as pd
 import mysql.connector
 from sqlalchemy import create_engine
@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
 import os
 
+
 db_config = {
     'host': 'localhost',
     'user': 'root',
@@ -16,12 +17,21 @@ db_config = {
     'database': 'member_db',    
 }
 
-DATABASE_URI = 'mysql+pymysql://root:Skylovesk2@localhost/member_db'
-engine = create_engine(DATABASE_URI)
 
 gehomeServer = Flask(__name__)
 
 CORS(gehomeServer)
+
+DATABASE_URI = 'mysql+pymysql://root:Skylovesk2@localhost/member_db'
+engine = create_engine(DATABASE_URI)
+gehomeServer.config['SQLALCHEMY_DATABASE_URI']=DATABASE_URI
+gehomeServer.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(gehomeServer)
+class User(db.Model):
+    __tablename__ = 'users'  # 指定模型对应的数据库表名
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
 
 def getDbConnection(config):
     try:
@@ -100,13 +110,24 @@ def show():
         return jsonify({'Error':'Failed to retrieve data'}), 400
 
 ##Register~~~~~~~~~~~~~~~
+@gehomeServer.route('/Register',methods=['GET','POST'])
+@cross_origin(origins="http://localhost:3000")
+def Registe():
+        data = request.get_json()
+        password = data.get('password')
+        username = data.get('username')
+        if User.query.filter_by(username=username).first() is not None:
 
-sdfsdf
+            return jsonify({'error': 'Username already exists'}), 400
+        
+        password_hash = generate_password_hash(password)
 
+            # 创建新用户并添加到数据库
+        new_user = User(username=username, password_hash=password_hash)
+        db.session.add(new_user)
+        db.session.commit()
 
-
-
-
+        return jsonify({'message': 'User registered successfully'}), 201
 
 
 
