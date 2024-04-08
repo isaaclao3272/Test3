@@ -4,7 +4,7 @@ import axios from 'axios';
 const Register = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('請注冊');
+    const [message, setMessage] = useState('請填寫資料');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
