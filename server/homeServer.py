@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import pandas as pd
@@ -6,8 +7,9 @@ import mysql.connector
 from sqlalchemy import create_engine
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import logging
 
 
 db_config = {
@@ -19,7 +21,8 @@ db_config = {
 
 
 gehomeServer = Flask(__name__)
-
+gehomeServer.config['JWT_SECRET_KEY'] = 'UAcSIZC2sA2mhJ2jQ3Yn2OyZOiCOvIlqLbb-_4dl6V6pvX8n4Pfi2E4Jql50arvFxKNrY4SmTL7dElVejRlhBQ'
+jwt = JWTManager(gehomeServer)
 CORS(gehomeServer)
 
 DATABASE_URI = 'mysql+pymysql://root:Skylovesk2@localhost/member_db'
@@ -32,6 +35,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 def getDbConnection(config):
     try:
@@ -113,9 +118,9 @@ def show():
 @gehomeServer.route('/Register',methods=['GET','POST'])
 @cross_origin(origins="http://localhost:3000")
 def Registe():
-        data = request.get_json()
-        password = data.get('password')
-        username = data.get('username')
+        username = request.json.get('username')
+        password = request.json.get('password')
+
         if User.query.filter_by(username=username).first() is not None:
 
             return jsonify({'error': 'Username already exists'}), 400
@@ -129,7 +134,18 @@ def Registe():
 
         return jsonify({'message': 'User registered successfully'}), 201
 
+@gehomeServer.route('/Login', methods =['POST'])
+def Login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    user = User.query.filter_by(username = username).first()
+    if user and user.check_password(password):
+        access_token = create_access_token(identity = username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "密碼或帳號錯誤"}), 401
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     gehomeServer.run(debug=True)

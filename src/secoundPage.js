@@ -13,6 +13,7 @@ const BackgroundDiv = styled.div`
   margin: -20px auto;
 `;
 
+
 function UploadExcel() {
     const [file, setFile] = useState(null);
   
@@ -66,9 +67,10 @@ function Inside() {
     return (
          <div>
         <BackgroundDiv>
-          <h1>Test</h1>
           <p>{message}</p>
           <UploadExcel/>
+          <br></br>
+          <br></br>
           <DynamicTable/>
         </BackgroundDiv>
       </div>

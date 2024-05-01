@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('請填寫資料');
+    const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -18,7 +20,7 @@ const Register = () => {
         try {
             const response = await axios.post('http://127.0.0.1:5000/Register', { username, password });
             setMessage('註冊成功！');
-            // 這裡可以添加後續操作，比如清空表單，跳轉頁面等
+            navigate('/Login');
         } catch (error) {
             setMessage('註冊失敗：' + (error.response?.data?.error || '未知錯誤'));
         }
@@ -33,7 +35,7 @@ const Register = () => {
                 onChange={(e) => setUsername(e.target.value)} 
                 placeholder="Username" 
             />
-            <br></br>
+            <br/>
             <input 
                 type="password" 
                 value={password} 

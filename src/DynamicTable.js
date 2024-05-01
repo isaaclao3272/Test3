@@ -75,13 +75,18 @@ const DynamicTable = () => {
             alert('fail to update');
             console.error('save error',error)
             })};
-    
+    const handleLogOut = () =>{
+        localStorage.removeItem('token');
+        window.location.href = '/Login';
+    };
 
     return (
         <div>
             <Stylebutton onClick={toggleEdit}> {isEditable ? "鎖定" : "可編輯"} </Stylebutton>
             <Stylebutton onClick={SaveChange}>Save</Stylebutton>
             <Stylebutton onClick={loadData}>All member</Stylebutton>
+            <br></br>
+            <Stylebutton onClick={handleLogOut}>check</Stylebutton>
             <ScrollAbleContainer>
                 {showTable && data.length > 0 ? (
                     <TableE>

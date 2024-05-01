@@ -1,11 +1,12 @@
-import logo from './logo.svg';
+import './Login';
 import './App.css';
-import './firstPage'
 import './firstPage';
 import './secoundPage';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './firstPage';
 import Inside from './secoundPage';
+import Login from './Login';
+import ProtectedRoute from './ProtectedRoute';
 
 //CSS------------------------------
 
@@ -16,8 +17,9 @@ function Homepage() {
     <Router>
        <div>
         <Routes>
-          <Route path ="/" exeact element = {<Register/>} />
-           <Route path ="/secoundPage" element = {<Inside/>}/>
+          <Route path ="/" element = {<Register/>} />
+          <Route path = "/Login" element = {<Login/>}/>
+          <Route path ="/secoundPage" element = {<ProtectedRoute><Inside/></ProtectedRoute>}/>
         </Routes>
     </div>
     </Router>
