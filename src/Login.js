@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 const Login = () => {
     const [message, setMessage] = useState("請填寫登錄資料")
@@ -18,8 +18,8 @@ const Login = () => {
         try {
             const response = await axios.post('http://127.0.0.1:5000/Login', { username:username, password:password });
             localStorage.setItem('token', response.data.access_token);
-            alert('Login successful:', response.data.access_token);
-            navigate('/secoundPage');
+            setMessage('登入成功，2秒後將跳到功能頁')
+            setTimeout(() => { window.location.href = '/secoundPage';}, 1500);
         }
         catch (error) {
             alert("登錄失敗:" + (error.response?.data?.msg || '未知錯誤'));

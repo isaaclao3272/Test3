@@ -17,8 +17,8 @@ function Homepage() {
     <Router>
        <div>
         <Routes>
-          <Route path ="/" element = {<Register/>} />
-          <Route path = "/Login" element = {<Login/>}/>
+          <Route path ="/" element = {<Login/>} />
+          <Route path = "/Register" element = {<Register/>}/>
           <Route path ="/secoundPage" element = {<ProtectedRoute><Inside/></ProtectedRoute>}/>
         </Routes>
     </div>

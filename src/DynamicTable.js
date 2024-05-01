@@ -75,9 +75,10 @@ const DynamicTable = () => {
             alert('fail to update');
             console.error('save error',error)
             })};
+
     const handleLogOut = () =>{
         localStorage.removeItem('token');
-        window.location.href = '/Login';
+        window.location.href = '/';
     };
 
     return (

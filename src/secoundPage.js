@@ -69,8 +69,6 @@ function Inside() {
         <BackgroundDiv>
           <p>{message}</p>
           <UploadExcel/>
-          <br></br>
-          <br></br>
           <DynamicTable/>
         </BackgroundDiv>
       </div>
