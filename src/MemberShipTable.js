@@ -1,6 +1,7 @@
 import React, {useEffect,useState} from 'react'
 import axios from 'axios'
 import styled from 'styled-components'
+import EventRecordTable from './eventRecordTable';
 
 const Stylebutton = styled.button`
     margin: 20px 30px;
@@ -38,7 +39,7 @@ const TableE = styled.table`
 
 
 
-const DynamicTable = () => {
+const MemberShipTable = () => {
     const [data, setData] = useState([]);
     const [showTable, setShowTable] = useState(false)
     const columnOrder = [
@@ -85,9 +86,11 @@ const DynamicTable = () => {
         <div>
             <Stylebutton onClick={toggleEdit}> {isEditable ? "鎖定" : "可編輯"} </Stylebutton>
             <Stylebutton onClick={SaveChange}>Save</Stylebutton>
+            <br></br>
             <Stylebutton onClick={loadData}>All member</Stylebutton>
             <br></br>
-            <Stylebutton onClick={handleLogOut}>check</Stylebutton>
+            <Stylebutton onClick={handleLogOut}>Logout</Stylebutton>
+            <h3>{showTable ? "all Member" :""}</h3>
             <ScrollAbleContainer>
                 {showTable && data.length > 0 ? (
                     <TableE>
@@ -123,4 +126,4 @@ const DynamicTable = () => {
     )
 }
 
-export default DynamicTable;
+export default MemberShipTable;

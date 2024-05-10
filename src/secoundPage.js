@@ -1,16 +1,16 @@
 import React, {useEffect,useState} from 'react';
 import axios from 'axios';
 import styled from "styled-components";
-import './DynamicTable';
-import DynamicTable from './DynamicTable';
-
+import './MemberShipTable';
+import MemberShipTable from './MemberShipTable';
+import EventRecordTable from './eventRecordTable';
 
 const BackgroundDiv = styled.div`
   text-align: center;
   background: #C6EBC5;
   width: 100%;
-  width: 100%;
-  margin: -20px auto;
+  height: 100%;
+  margin: 10px auto;
 `;
 
 
@@ -52,6 +52,42 @@ function UploadExcel() {
     );
   }
 
+//Upload Event~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const UploadEvent = () => {
+  const [file, setFile] = useState(null);
+  
+  function chooseFile (event) {
+    setFile(event.target.files[0]);
+  }
+  function uploadClick () {
+     if(!file) {
+      return alert('Please choose a file');
+     }
+
+     const formData = new FormData();
+     formData.append('excelFile',file);
+
+     axios.post("http://127.0.0.1:5000/uploadEvent", formData,{
+      headers:{
+        "Content-Type" : 'multipart/form-data'
+      }
+     } )
+     .then(response => {
+      alert('upload successful');
+     })
+     .catch(error => {
+      alert('fail to upload');
+      console.error('upload error',error);
+     });
+  }
+  return (
+    <div>
+      <input type='file' onChange={chooseFile} accept='.xls,.xlsx'/>
+      <button onClick={uploadClick}>上傳簽到表</button>
+    </div>
+  )
+}
+
 function Inside() {
     const [message, setMessage] = useState()
     useEffect(() => {
@@ -68,8 +104,11 @@ function Inside() {
          <div>
         <BackgroundDiv>
           <p>{message}</p>
+          <UploadEvent/>
+          <br></br>
           <UploadExcel/>
-          <DynamicTable/>
+          <MemberShipTable/>
+          <EventRecordTable/>
         </BackgroundDiv>
       </div>
     );

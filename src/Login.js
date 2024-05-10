@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Navigate } from "react-router-dom";
+import styled from "styled-components";
+
+const Background = styled.div`
+    text-align: center;
+`;
 
 const Login = () => {
     const [message, setMessage] = useState("請填寫登錄資料")
@@ -26,23 +31,29 @@ const Login = () => {
         }
     };
     return (
-        <div>
+        <Background>
             <form onSubmit={handleSummit}>
+            <br></br>
             <div>{message}</div>
+            <br></br>
             <input 
             placeholder="username"
             value={username}
             onChange={(e)=>setUsername(e.target.value)}
             type="text"
             ></input>
+            <br></br>
+            <br></br>
             <input placeholder="password"
             value={password}
             onChange={(e)=>setPassword(e.target.value)}
             type="text">
             </input>
+            <br></br>
+            <br></br>
             <button type="sumit">Login</button>
             </form>
-        </div>
+        </Background>
 
     )
 }

@@ -30,6 +30,7 @@ engine = create_engine(DATABASE_URI)
 gehomeServer.config['SQLALCHEMY_DATABASE_URI']=DATABASE_URI
 gehomeServer.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(gehomeServer)
+
 class User(db.Model):
     __tablename__ = 'users'  # 指定模型对应的数据库表名
     id = db.Column(db.Integer, primary_key=True)
@@ -69,8 +70,7 @@ ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#updateCell~~~~~~~~~~~~~~~~~
-
+#updateCell~~~~~~~~~~~~~~~~
 @gehomeServer.route('/updateCell', methods = ['PUT'])
 def updateCell():
     data= request.get_json().get('data' , None)
@@ -82,13 +82,11 @@ def updateCell():
         return jsonify({'Error': 'No data provided'}), 400
     
 #First page ~~~~~~~~~~~~~~~~~~
-
 @gehomeServer.route('/', methods = ['GET'])
 def homPage():
     return '連接成功'
 
 #Upload~~~~~~~~~~~~~~~~~~~~~~~~~
-
 @gehomeServer.route('/upload', methods = ['POST'])
 def upLoadFile():
     if 'excelFile' not in request.files:
@@ -98,16 +96,42 @@ def upLoadFile():
         return jsonify({'Error':'No selected file'}), 400
     if not allowed_file(file.filename):
         return jsonify({'Error':'File Type not allowed'}), 400
-    df = pd.read_excel(file.stream, engine ='openpyxl')
+    df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['出生日期(原)'])
+    df['出生日期(原)'] = pd.to_datetime(df['出生日期(原)'])
+    df['出生日期(原)'] = df['出生日期(原)'].dt.strftime('%Y-%m-%d')
     df.to_sql('members2', con= engine, if_exists='replace', index=False)
     return jsonify({'Message': 'File uploaded and processed successfully'}), 200
 
+#~~~~~upload event
+@gehomeServer.route('/uploadEvent', methods = ['POST'])
+def upLoadEvent():
+    if 'excelFile' not in request.files:
+        return jsonify({'Error':'no file part'}), 400
+    file = request.files['excelFile']
+    if file.filename == '':
+        return jsonify({'Error':'No selected file'}), 400
+    if not allowed_file(file.filename):
+        return jsonify({'Error':'File Type not allowed'}), 400
+    df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['活動日期'])
+    df['活動日期'] = df['活動日期'].dt.strftime('%Y-%m-%d')
+    df.to_sql('eventRecord', con= engine, if_exists='replace', index=False)
+    return jsonify({'Message': 'File uploaded and processed successfully'}), 200
 
-# SHOW TABLE~~~~~~~~~~~~~~~~~~
+# SHOW all member TABLE~~~~~~~~~~~~~~~~~
 
 @gehomeServer.route('/showData', methods=["POST"])
-def show():
+def showAllMember():
     sql= ('SELECT * FROM members2')
+    data=excuteCon(sql)
+    if data:
+        return jsonify(data)
+    else:
+        return jsonify({'Error':'Failed to retrieve data'}), 400
+
+# SHOW EVENT
+@gehomeServer.route('/showEvent', methods=["POST"])
+def showEvent():
+    sql= ('SELECT * FROM eventRecord')
     data=excuteCon(sql)
     if data:
         return jsonify(data)
