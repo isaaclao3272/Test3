@@ -3,7 +3,7 @@ import axios from 'axios';
 import styled from "styled-components";
 import './MemberShipTable';
 import MemberShipTable from './MemberShipTable';
-import EventRecordTable from './eventRecordTable';
+
 
 const BackgroundDiv = styled.div`
   text-align: center;
@@ -108,7 +108,6 @@ function Inside() {
           <br></br>
           <UploadExcel/>
           <MemberShipTable/>
-          <EventRecordTable/>
         </BackgroundDiv>
       </div>
     );

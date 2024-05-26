@@ -70,13 +70,24 @@ ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#updateCell~~~~~~~~~~~~~~~~
-@gehomeServer.route('/updateCell', methods = ['PUT'])
-def updateCell():
+#update Member ~~~~~~~~~~~~~~~~
+@gehomeServer.route('/updateMember', methods = ['PUT'])
+def updateMember():
     data= request.get_json().get('data' , None)
     if data: 
         df = pd.DataFrame(data)
         df.to_sql('members2', con= engine, if_exists='replace', index=False)
+        return jsonify({'Message': 'Data updated successfully'}), 200
+    else:
+        return jsonify({'Error': 'No data provided'}), 400
+
+#update Event~~~~~~~~
+@gehomeServer.route('/updateEvent', methods = ['PUT'])
+def updateEvent():
+    data= request.get_json().get('data' , None)
+    if data: 
+        df = pd.DataFrame(data)
+        df.to_sql('eventRecord', con= engine, if_exists='replace', index=False)
         return jsonify({'Message': 'Data updated successfully'}), 200
     else:
         return jsonify({'Error': 'No data provided'}), 400
@@ -97,7 +108,7 @@ def upLoadFile():
     if not allowed_file(file.filename):
         return jsonify({'Error':'File Type not allowed'}), 400
     df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['出生日期(原)'])
-    df['出生日期(原)'] = pd.to_datetime(df['出生日期(原)'])
+    df['出生日期(原)'] = pd.to_datetime(df['出生日期(原)'], format="mixed")
     df['出生日期(原)'] = df['出生日期(原)'].dt.strftime('%Y-%m-%d')
     df.to_sql('members2', con= engine, if_exists='replace', index=False)
     return jsonify({'Message': 'File uploaded and processed successfully'}), 200
@@ -112,8 +123,9 @@ def upLoadEvent():
         return jsonify({'Error':'No selected file'}), 400
     if not allowed_file(file.filename):
         return jsonify({'Error':'File Type not allowed'}), 400
-    df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['活動日期'])
-    df['活動日期'] = df['活動日期'].dt.strftime('%Y-%m-%d')
+    df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['開始日期'])
+    df['開始日期'] = df['開始日期'].dt.strftime('%Y-%m-%d')
+    df['結束日期'] = df['結束日期'].dt.strftime('%Y-%m-%d')
     df.to_sql('eventRecord', con= engine, if_exists='replace', index=False)
     return jsonify({'Message': 'File uploaded and processed successfully'}), 200
 
@@ -169,6 +181,12 @@ def Login():
     else:
         return jsonify({"msg": "密碼或帳號錯誤"}), 401
 
+# @gehomeServer.route('/codition', methods = ['GET'])
+# def conformExist():
+#      with engine.connect() as connection:
+         
+         
+#     return()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
