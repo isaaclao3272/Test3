@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import ConditionTable from './CoditionSelect';
 
 const StyleButton = styled.button`
   margin: 20px 30px;
@@ -50,7 +51,7 @@ const MemberShipTable = () => {
 
 
   const memberColumn = ['ID','中文姓名','出生日期(原)','年齡','身份證號碼','電話'];
-  const eventColumn = ['項目名稱','子項目名稱(如有)','參加者姓名','參加者會員編號','參與時數','開始日期','結束日期'];
+  const eventColumn = ['ID','項目名稱','子項目名稱(如有)','參加者姓名','參加者會員編號','參與時數','開始日期','結束日期'];
 
   const toggleEdit = () => {
     setIsEditable(!isEditable);
@@ -143,7 +144,7 @@ const MemberShipTable = () => {
       <br />
       <StyleButton onClick={() => loadData('showData', 'All Member', 'member')}>All Member</StyleButton>
       <StyleButton onClick={() => loadData('showEvent', 'All Event', 'event')}>All Event</StyleButton>
-      <StyleButton>Check</StyleButton>
+      {/* <StyleButton onClick={}>Check</StyleButton> */}
       <br />
       <StyleButton onClick={handleLogOut}>Logout</StyleButton>
       <ScrollableContainer>

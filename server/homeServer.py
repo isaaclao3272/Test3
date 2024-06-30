@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import pandas as pd
 import mysql.connector
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, ForeignKey
 from werkzeug.utils import secure_filename
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -181,12 +181,19 @@ def Login():
     else:
         return jsonify({"msg": "密碼或帳號錯誤"}), 401
 
-# @gehomeServer.route('/codition', methods = ['GET'])
-# def conformExist():
-#      with engine.connect() as connection:
-         
-         
-#     return()
+@gehomeServer.route('/codition', methods = ['GET'])
+def conformExist():
+    with engine.connect as connection:
+        event_df = pd.read_sql('SELECT * FROM eventRecord',connection)
+        member_df = pd.read_sql('SELECT * FROM members2', connection)
+        valid_members = member_df[member_df['ID'].isin(event_df['參加者會員編號'])]
+        conformMember = valid_members.to_dict(orient='records')
+
+        return jsonify(conformMember)
+    
+# @gehomeServer.route('/selectPage', method =['Get'])
+#     def 
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const StyleButton = styled.button`
@@ -35,18 +35,20 @@ const TableElement = styled.table`
   margin: 0 auto;
 `;
 
-const ConditionTable = () =>{
+// const ConditionTable = () =>{
+// const [memberData, setMemberData] = useState(null)
 
-function conforExist() {
-     axios.get('http://127.0.0.1:5000/condition')
-     
-}
+// useEffect(() => {
 
+//   const loadData =  async =>{
+//   try{
+//     const response = await.axios.get('http://127.0.0.1:5000/condition');
+//     setMemberData(response.data);
+//     console.log(memberData)
+//   } catch(error) {
+//     console.error('Error fetching data:', error);
+//   }   
+// }, []})
+// };
 
-return (
-
-);
-
-};
-
-export default ConditionTable
+// export default ConditionTable
