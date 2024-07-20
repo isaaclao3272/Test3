@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import ConditionTable from './CoditionSelect';
 
 const StyleButton = styled.button`
   margin: 20px 30px;

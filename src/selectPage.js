@@ -53,7 +53,7 @@ const SelectPage = () =>
 {
     function toShowData () 
     {
-        window.location.href = '/secoundPage';
+        window.location.href = '/showDataPage';
     }
     function toUpload ()
     {

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for ,send_file, Response
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import logging
-
+from io import StringIO, BytesIO
 
 db_config = {
     'host': 'localhost',
@@ -126,7 +126,7 @@ def upLoadEvent():
     df = pd.read_excel(file.stream, engine ='openpyxl',parse_dates=['開始日期'])
     df['開始日期'] = df['開始日期'].dt.strftime('%Y-%m-%d')
     df['結束日期'] = df['結束日期'].dt.strftime('%Y-%m-%d')
-    df.to_sql('eventRecord', con= engine, if_exists='replace', index=False)
+    df.to_sql('eventRecord', con= engine, if_exists='append', index=False)
     return jsonify({'Message': 'File uploaded and processed successfully'}), 200
 
 # SHOW all member TABLE~~~~~~~~~~~~~~~~~
@@ -169,7 +169,7 @@ def Registe():
         db.session.commit()
 
         return jsonify({'message': 'User registered successfully'}), 201
-
+# ~~~~~~~~~~Login
 @gehomeServer.route('/Login', methods =['POST'])
 def Login():
     username = request.json.get('username')
@@ -191,8 +191,55 @@ def conformExist():
 
         return jsonify(conformMember)
     
-# @gehomeServer.route('/selectPage', method =['Get'])
-#     def 
+
+@gehomeServer.route('/download_excel', methods=["GET"])
+def download_excel():
+    try:
+        logging.info("Executing SQL query...")
+        sql = ('SELECT * FROM eventRecord')
+        result_proxy = excuteCon(sql)
+        
+        logging.info(f"SQL query executed successfully. Number of rows fetched: {len(result_proxy)}")
+        
+        if result_proxy:
+            logging.info("Converting result set to DataFrame...")
+            data = [dict(row) for row in result_proxy]
+            df = pd.DataFrame(data)
+
+            desired_order = ['項目名稱','子項目名稱','開始日期','結束日期','錄入日期','錄入者','參加者姓名','參加者會員編號',
+                             '參加者電話','家長姓名','家長電話','是否工作人員/志願者','參與場數','參與時數','有否出席','項目負責人']
+            
+            df = df[desired_order]
+
+            logging.info("Creating in-memory Excel file...")
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='EventRecords')
+            output.seek(0)
+            
+            def generate():
+                chunk_size = 4096
+                while True:
+                    chunk = output.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
+
+            headers = {
+                'Content-Disposition': 'attachment; filename="event_records.xlsx"',
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+            
+            logging.info("Sending file response...")
+            return Response(generate(), headers=headers)
+        else:
+            logging.warning("No data found in eventRecord table.")
+            return jsonify({'Error': 'No data found'}), 404
+    except Exception as e:
+        logging.error(f"Error in /download_excel: {str(e)}", exc_info=True)
+        return jsonify({'Error': str(e)}), 500
+
+
 
 
 if __name__ == "__main__":

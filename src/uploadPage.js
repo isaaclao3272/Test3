@@ -2,7 +2,6 @@ import React, {useEffect,useState} from 'react';
 import axios from 'axios';
 import styled from "styled-components";
 import './MemberShipTable';
-import MemberShipTable from './MemberShipTable';
 
 const MainDiv = styled.div`
     display: flex;

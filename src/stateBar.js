@@ -12,6 +12,7 @@ const Background = styled.div`
 const Greeting = styled.div`
     flex: 1 ;
   font-size: 20px;
+  margin-left: 13px;
 `;
 
 const Logout = styled.button`

@@ -81,7 +81,9 @@ const Login = () => {
             });
     };
 
-    connectToServer()
+    useEffect(() => {
+        connectToServer()
+    },[])
 
     return (
         <MainContiner>
