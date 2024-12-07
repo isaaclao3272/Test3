@@ -48,8 +48,6 @@ const Login = () => {
     const [message, setMessage] = useState("請填寫登錄資料")
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [token, setToken] = useState('')
-    const navigate = useNavigate()
     const [connectInfo, setconnectInfo] = useState("")
 
     const handleSummit = async(event) =>{

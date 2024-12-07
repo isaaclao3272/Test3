@@ -6,7 +6,8 @@ const Background = styled.div`
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 0 20px;   
+    padding: 0 20px; 
+    height: 40px;
 `;
 
 const Greeting = styled.div`

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import StatesBar from './stateBar';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
+import Filter from './headerFilter';
 
 const MainContainer = styled.div`
   display: flex;
@@ -20,18 +21,18 @@ const Top = styled.div`
 `;
 
 const Body = styled.div`
-  flex: 1;
+  flex: 2;
   display: flex;
   background-color: white;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: hidden;
 `;
 
 const ButtonContainer = styled.div`
-  flex: 0.15;
+  flex: 1;
   display: flex;
   align-items: center;
-  margin-left: 30px;
+  margin: 0 20px;
 `;
 
 const DataContainer = styled.div`
@@ -39,13 +40,15 @@ const DataContainer = styled.div`
   display: flex;
   text-align: center;
   flex-direction: column;
-  overflow-x: auto;
-  border: 3px solid black;
-  margin: 0px 50px;
+  margin: 0px 20px;
+  border: 5px solid black;
   border-top-left-radius: 35px;
   border-top-right-radius: 35px;
   background-color: #D9D9D9;
+  align-items: center;
 `;
+
+
 
 const Bottom = styled.div`
   flex: 0 1 100px;
@@ -59,31 +62,90 @@ const StyleButton = styled.button`
 const TableHeader = styled.th`
   white-space: nowrap;
   width: 50px;
-  border-collapse: collapse;
-  border: 1px solid black;
+  border-top: 3px solid black;
+  border-bottom: 2px solid black;
+  border-left: 1.5px solid black;
+  border-right: 1.5px solid black;
   padding: 8px;
   height: 40px;
   background-color: #30B6D3;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 `;
 
 const TableData = styled.td`
-  white-space: nowrap;
+  white-space: normal;
   width: 50px;
-  border-collapse: collapse;
   border: 1px solid black;
-  padding: 8px;
+  padding: 5px 2px 5px 2px;
   &:focus {
     outline: 2px solid blue;
-  }
+  };
+`;
+
+const Title = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grip-gap: 30px;
+`;
+
+const H1 = styled.div`
+  text-align: center;
+  grid-column: 2;
+`;
+const H2 = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0px 0px 10px 0px;
+`;
+const HeaderFilter = styled.div`
+  grid-column: 3;
+  align-self: end;
+  padding: 10px;
+`;
+
+const Tablecontainer = styled.div`
+  white-space: normal;
+  width: 95%;
+  align-items: center;
+  overflow: auto;
+  height: 100vh;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
 `;
 
 const TableElement = styled.table`
-  border-collapse: collapse;
+  align-items: center;
   margin: 0 auto;
-  width:90%;
+  width:100%;
   background-color: white;
+  table-layout: auto;
+  border-spacing: 0;
+  border-collapse: separate;
 `;
 
+//----------------------------------------------
+
+const FilterBox = styled.div`
+  position: 'fixed',
+  width: '300px',
+  height: '300px',
+  backgroundColor: '#f9f9f9',
+  border: '1px solid #ddd',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+  borderRadius: '5px',
+  padding: '20px',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 1000,
+`;
+
+
+
+//----------------------------------------------
 const MemberShipTable = () => {
   const [data, setData] = useState([]);
   const [showTable, setShowTable] = useState(false);
@@ -93,9 +155,10 @@ const MemberShipTable = () => {
   const [columnTitle, setColumnTitle] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'ascending' });
 
-  const memberColumn = ['ID', '中文姓名', '出生日期(原)', '年齡', '身份證號碼', '電話', '會員類形'];
-  const eventColumn = ['項目名稱', '子項目名稱', '項目負責人', '錄入者', '參加者姓名', '家長姓名', '參加者會員編號', '參與時數', '開始日期', '結束日期', '參加者電話'];
-  const analysedColumn = ['ID','中文姓名','年齡', '參加場數', '總參加時數', '是否會員'];
+  const [memberColumn, setmemberColumn] = useState([{name:'ID', visible: true}, {name:'中文姓名', visible: true}, {name:'出生日期(原)', visible: true}, {name:'年齡', visible: true}, {name:'身份證號碼', visible: true}, {name:'電話', visible: true}, {name:'會員類形', visible: true}]);
+  const [eventColumn, seteventColumn] = useState([{name:'參加者會員編號', visible: true}, {name:'項目名稱', visible: true}, {name:'子項目名稱', visible: true}, {name:'錄入者', visible: true},{name:'參加者姓名', visible: true},{name:'家長姓名', visible: true},{name:'參與時數', visible: true},{name:'參與場數', visible: true},{name:'開始日期', visible: true},{name:'結束日期', visible: true},{name:'參加者電話', visible: true}]);
+  const [analysedColumn, setanalyseColumn] = useState([{name:'ID', visible: true},{name:'中文姓名', visible: true},{name:'年齡', visible: true},{name:'參加場數', visible: true},{name:'總參加時數', visible: true}]);
+  const[updatedAnalysedColumn, setupdatedAnalysedColumn] = useState([{name:'ID', visible: true},{name:'中文姓名', visible: true},{name:'年齡', visible: true},{name:'參加場數', visible: true},{name:'總參加時數', visible: true}, {name:'會員類型',visible:true}, {name:'是否工作人員/志願者',visible:true},{name:'曾參與的項目',visible:true}]);
 
   const toggleEdit = () => {
     setIsEditable(!isEditable);
@@ -188,35 +251,36 @@ const MemberShipTable = () => {
       const events = eventResponse.data;
 
       // Create a map for quick lookup of membership status and type
-      const memberMap = new Map(members.map(member => [member['中文姓名'], { isMember: true, type: member['會員類形'],id:member['ID'],age:member['年齡']}]));
+      const memberMap = new Map(members.map(member => [member['ID'], { isMember: true, type: member['會員類形'],name: member['中文姓名'], id:member['ID'], age:member['年齡']}]));
 
       // Aggregate data
       const aggregatedData = events.reduce((acc, event) => {
         const name = event['參加者姓名'];
+        const memberID = event['參加者會員編號']
         const phoneNumber = event['參加者電話'];
-        const key = `${name}-${phoneNumber}`;
+        const uniqueKey = memberID || `${name}-${phoneNumber}`;
         const hours = parseFloat(event['參與時數']) || 0;
         const sequence = parseFloat(event['參與場數']) || 0;
         const volunteer = event['是否工作人員/志願者'];
 
-        if (!acc[name]) {
-          const memberInfo = memberMap.get(name);
-          acc[name] = { 
-            'ID': memberInfo ? memberInfo.id :'',
+        if (!acc[uniqueKey]) {
+          const memberInfo = memberMap.get(memberID);
+
+          acc[uniqueKey] = { 
+            'ID': memberID || 'N/A',
             '中文姓名': name,
-            '年齡': memberInfo? memberInfo.age : "/", 
+            '年齡': memberInfo ? memberInfo.age : "N/A",
             '參加場數': 0, 
             '總參加時數': 0, 
-            '是否會員': memberInfo ? 'Y' : 'N',
             '會員類型': memberInfo ? memberInfo.type : '',
             '是否工作人員/志願者': volunteer,
             '曾參與的項目':[]
           };
         }
 
-        acc[name]['參加場數'] += sequence;
-        acc[name]['總參加時數'] += hours;
-        acc[name]['曾參與的項目'].push(event['子項目名稱'])
+        acc[uniqueKey]['參加場數'] += sequence;
+        acc[uniqueKey]['總參加時數'] += hours;
+        acc[uniqueKey]['曾參與的項目'].push(event['子項目名稱']);
 
 
         return acc;
@@ -227,10 +291,8 @@ const MemberShipTable = () => {
         ...item,
         '曾參與的項目': item['曾參與的項目'].join(', ')  // Join the event names with a comma and space
       }));
-      console.log(analysedData)
       // Update column titles to include the new column
-      const updatedAnalysedColumn = [...analysedColumn, '會員類型', '是否工作人員/志願者','曾參與的項目'];
-
+      
       setColumnTitle(updatedAnalysedColumn);
       setData(analysedData);
       setShowTable(true);
@@ -239,6 +301,7 @@ const MemberShipTable = () => {
     }))
     .catch(error => console.log(error));
   };
+
   const downloadAnalyse = () => {
     // Generate a worksheet from the data
     const ws = XLSX.utils.json_to_sheet(data);
@@ -267,6 +330,16 @@ const MemberShipTable = () => {
       console.error('There was an error downloading the Excel file!', error);
     });
   };
+  const updateFilterChange = (newUpdate) => {
+    if (columnTitle == memberColumn) {
+      setmemberColumn(newUpdate)}
+    else if (columnTitle == eventColumn) {
+      seteventColumn(newUpdate)}
+    else {
+      setupdatedAnalysedColumn(newUpdate)
+    }
+    
+  };
 
   return (
     <MainContainer>
@@ -284,40 +357,52 @@ const MemberShipTable = () => {
           <StyleButton onClick={downloadAnalyse}>Dl2</StyleButton>
         </ButtonContainer>
         <DataContainer>
-          <h3>{title}</h3>
-          {showTable && (
-            <TableElement>
-              <thead>
-                <tr>
-                  {columnTitle.map((col, index) => (
-                    <TableHeader key={index} onClick={() => handleSort(col)}>{col}</TableHeader>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    <TableData>
-                      {isEditable && (
-                        <button onClick={() => handleDeleteRow(rowIndex)}>刪除</button>
-                      )}
-                      {row[columnTitle[0]]}
-                    </TableData>
-                    {columnTitle.slice(1).map((col, colIndex) => (
-                      <TableData
-                        key={colIndex}
-                        contentEditable={isEditable}
-                        onBlur={(e) => handleCellChange(rowIndex, col, e)}
-                        suppressContentEditableWarning={true}
-                      >
-                        {row[col]}
-                      </TableData>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </TableElement>
-          )}
+          <Title>
+            <H1>
+              <h3>{title}</h3>
+            </H1>
+            <HeaderFilter>
+            <Filter header={columnTitle} updateChange = {updateFilterChange}></Filter>
+            </HeaderFilter>
+          </Title>
+          <Tablecontainer>
+                {showTable && (
+                  <TableElement>
+                    <thead>
+                      <tr>
+                        {columnTitle.map((col, index) => (
+                          col.visible && (
+                          <TableHeader key={index} onClick={() => handleSort(col.name)}>
+                              {col.name}
+                          </TableHeader>
+                        )))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          <TableData>
+                            {isEditable && (
+                              <button onClick={() => handleDeleteRow(rowIndex)}>刪除</button>
+                            )}
+                            {row[columnTitle[0].name]}
+                          </TableData>
+                          {columnTitle.slice(1).map((col, colIndex) => (
+                            <TableData
+                              key={colIndex}
+                              contentEditable={isEditable}
+                              onBlur={(e) => handleCellChange(rowIndex, col, e)}
+                              suppressContentEditableWarning={true}
+                              >
+                              {row[col.name]}
+                            </TableData>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                </TableElement>
+            )}
+          </Tablecontainer>
         </DataContainer>
       </Body>
     </MainContainer>
