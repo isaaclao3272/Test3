@@ -23,7 +23,7 @@ db_config = {
 gehomeServer = Flask(__name__)
 gehomeServer.config['JWT_SECRET_KEY'] = 'UAcSIZC2sA2mhJ2jQ3Yn2OyZOiCOvIlqLbb-_4dl6V6pvX8n4Pfi2E4Jql50arvFxKNrY4SmTL7dElVejRlhBQ'
 jwt = JWTManager(gehomeServer)
-CORS(gehomeServer)
+CORS(gehomeServer, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"], "supports_credentials": True}})
 
 DATABASE_URI = 'mysql+pymysql://root:Skylovesk2@localhost/member_db'
 engine = create_engine(DATABASE_URI)
