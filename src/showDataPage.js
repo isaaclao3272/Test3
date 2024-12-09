@@ -332,11 +332,14 @@ const MemberShipTable = () => {
   };
   const updateFilterChange = (newUpdate) => {
     if (columnTitle == memberColumn) {
-      setmemberColumn(newUpdate)}
+      setmemberColumn(newUpdate)
+      setColumnTitle(memberColumn)}
     else if (columnTitle == eventColumn) {
-      seteventColumn(newUpdate)}
+      seteventColumn(newUpdate)
+      setColumnTitle(eventColumn)}
     else {
       setupdatedAnalysedColumn(newUpdate)
+      setColumnTitle(updatedAnalysedColumn)
     }
     
   };
@@ -381,22 +384,12 @@ const MemberShipTable = () => {
                     <tbody>
                       {data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
-                          <TableData>
-                            {isEditable && (
-                              <button onClick={() => handleDeleteRow(rowIndex)}>刪除</button>
-                            )}
-                            {row[columnTitle[0].name]}
+                          {columnTitle.map((col,index) => (
+                          col.visible &&
+                          <TableData key={index}>
+                            {row[col.name]}
                           </TableData>
-                          {columnTitle.slice(1).map((col, colIndex) => (
-                            <TableData
-                              key={colIndex}
-                              contentEditable={isEditable}
-                              onBlur={(e) => handleCellChange(rowIndex, col, e)}
-                              suppressContentEditableWarning={true}
-                              >
-                              {row[col.name]}
-                            </TableData>
-                          ))}
+                        ))}
                         </tr>
                       ))}
                     </tbody>

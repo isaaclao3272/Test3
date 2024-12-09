@@ -60,7 +60,7 @@ const Filter =  ({header, updateChange}) => {
                     <DataContainer>
                     {header.map((head, index) => (
                         <label key= {index}>
-                            <input type= "checkbox"  defaultChecked={head.visible? true: false} onChange={() => handleCheck(index)}/>
+                            <input type= "checkbox"  checked={head.visible} onChange={() => handleCheck(index)}/>
                             {head.name}
                             </label>
                     ))}
