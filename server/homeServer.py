@@ -131,14 +131,28 @@ def upLoadEvent():
 
 # SHOW all member TABLE~~~~~~~~~~~~~~~~~
 
-@gehomeServer.route('/showData', methods=["POST"])
+@gehomeServer.route('/showData', methods=["GET"])
 def showAllMember():
-    sql= ('SELECT * FROM members2')
-    data=excuteCon(sql)
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({'Error':'Failed to retrieve data'}), 400
+    try:
+        sql = 'SELECT * FROM members2'
+        connection = getDbConnection(db_config)
+        if connection is None:
+            return jsonify({'Error': 'Database connection failed'}), 500
+
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute(sql)
+            data = cursor.fetchall()
+            columnTitle = [desc[0] for desc in cursor.description]
+
+        if not data:
+            return jsonify({'Error': 'No data found'}), 404
+
+        return jsonify({"data": data, "columnTitle": columnTitle})
+    except Exception as e:
+        return jsonify({'Error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 # SHOW EVENT
 @gehomeServer.route('/showEvent', methods=["POST"])
