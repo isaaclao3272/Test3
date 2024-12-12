@@ -109,8 +109,6 @@ const Tablecontainer = styled.div`
   align-items: center;
   overflow: auto;
   height: 100vh;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
 `;
 
 const TableElement = styled.table`
@@ -149,20 +147,25 @@ const MemberShipTable = () => {
   const [title, setTitle] = useState('');
   const [columnTitle, setColumnTitle] = useState([]);
 
-  const loadData = () => {
-    axios.get(`http://127.0.0.1:5000/showData`)
+  const loadData = (endpoint) => {
+    axios.get(`http://127.0.0.1:5000/${endpoint}`)
       .then((response) => {
         setColumnTitle(response.data.columnTitle);
         setData(response.data.data);
         setShowTable(true)
-      })};
+      })
+      .catch((error) => {
+        console.error('error',error)
+      })
+    };
 
   return (
     <MainContainer>
       <Top><StatesBar /></Top>
       <Body>
         <ButtonContainer>
-          <StyleButton onClick={() => loadData()}>All Member</StyleButton>
+          <StyleButton onClick={() => loadData('showData')}>All Member</StyleButton>
+          <StyleButton onClick={()=> loadData('showEvent') }>Event</StyleButton>
         </ButtonContainer>
         <DataContainer>
           <Title>
@@ -175,7 +178,7 @@ const MemberShipTable = () => {
                   <TableElement>
                     <thead>
                       <tr>
-                        {columnTitle.map((col, index) => (
+                        {columnTitle && columnTitle.map((col, index) => (
                           <TableHeader key={index}>
                               {col}
                           </TableHeader>
@@ -183,7 +186,7 @@ const MemberShipTable = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((row, rowIndex) => (
+                      {data && data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                           {columnTitle.map((col,index) => (
                           <TableData key={index}>

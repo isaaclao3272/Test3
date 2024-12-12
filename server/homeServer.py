@@ -141,13 +141,13 @@ def showAllMember():
 
         with connection.cursor(dictionary=True) as cursor:
             cursor.execute(sql)
+            desire_columnTitle = ['ID','中文姓名', '主管確認資格', '任職公司(S)', '任職公司(原)', '備註', '入會日期(月/日/年)', '出生日期(原)', '出生日期TEST', '員工號碼', '回鄉證號碼', '外文姓名', '家屬姓名', '家屬電話', '年齡', '性別', '推薦人任職公司', '推薦人博企員工號碼', '推薦人回鄉證號碼', '推薦人姓名', '推薦人會員編號', '推薦人職位', '推薦人身份證號碼', '會員來源', '會員是推薦人的', '會員類形', '確認資料齊全及無誤', '經手人', '職位', '職業', '資料更新日期', '身份證號碼', '附件', '電話', '願意收取訊息']
             data = cursor.fetchall()
-            columnTitle = [desc[0] for desc in cursor.description]
-
+            row = [{col: row[col] for col in desire_columnTitle}for row in data]
         if not data:
             return jsonify({'Error': 'No data found'}), 404
 
-        return jsonify({"data": data, "columnTitle": columnTitle})
+        return jsonify({"data": row, "columnTitle": desire_columnTitle})
     except Exception as e:
         return jsonify({'Error': str(e)}), 500
     finally:
@@ -155,14 +155,27 @@ def showAllMember():
             connection.close()
 
 # SHOW EVENT
-@gehomeServer.route('/showEvent', methods=["POST"])
+@gehomeServer.route('/showEvent', methods=["GET"])
 def showEvent():
-    sql= ('SELECT * FROM eventRecord')
-    data=excuteCon(sql)
-    if data:
-        return jsonify(data)
-    else:
-        return jsonify({'Error':'Failed to retrieve data'}), 400
+    try:
+        sql= ('SELECT * FROM eventRecord')
+        connector = getDbConnection(db_config)
+        if connector is None:
+            return jsonify({"Error":"unable to connect databasic"}), 500
+
+        with connector.cursor(dictionary=True) as cursor:
+            cursor.execute(sql)
+            data = cursor.fetchall()
+            columnTitle = [desc[0] for desc in cursor.description]
+            if not data:
+                return jsonify({"Error":"There is no data"}), 404
+            
+            return jsonify({"data":data, "columnTitle":columnTitle})
+    except Exception as e:
+        return jsonify({"Error":str(e)})
+    finally:
+        if connector:
+            connector.close()
 
 ##Register~~~~~~~~~~~~~~~
 @gehomeServer.route('/Register',methods=['GET','POST'])
