@@ -146,26 +146,74 @@ const MemberShipTable = () => {
   const [showTable, setShowTable] = useState(false);
   const [title, setTitle] = useState('');
   const [columnTitle, setColumnTitle] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] =useState(1);
+  const containerRef = useRef(null);
+  const [switchPage, setswitchPage] = useState('showData');
+  const timeOut = useRef(null);
+  const isLoading = useRef(false);
 
-  const loadData = (endpoint) => {
-    axios.get(`http://127.0.0.1:5000/${endpoint}`)
+  const loadData =  (endpoint, title, page) => {
+    axios.get(`http://127.0.0.1:5000/${endpoint}?page=${page}`)
       .then((response) => {
+        const newData = response.data.data;
+      if (page === 1) {
         setColumnTitle(response.data.columnTitle);
-        setData(response.data.data);
-        setShowTable(true)
+        setData(newData);
+      }else{
+        setData((prev) => [...prev,...newData]);
+      }
+        setShowTable(true);
+        setTitle(title);
+        setswitchPage(endpoint);
+
+      if (newData.length <50 ) setHasMore(false);
+      isLoading.current = false;
       })
       .catch((error) => {
         console.error('error',error)
       })
     };
 
+  const handleScroll = () => {
+    if (!containerRef.current || !hasMore || isLoading.current) return ;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    if (scrollHeight - scrollTop <= clientHeight + 50) {
+      if(timeOut.current) return;
+      timeOut.current = setTimeout(() => {
+      isLoading.current = true;
+      setPage((prev) => prev +1 );
+      timeOut.current = null;
+      }, 1000);
+    }
+  };
+
+  useEffect(()=>{
+    if (page > 1){
+    loadData(switchPage,title,page)
+    }
+  },[page]);
+
+  useEffect(() => {
+    loadData(switchPage,'All member',page)
+  },[]);
+
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasMore]);
+
   return (
     <MainContainer>
       <Top><StatesBar /></Top>
       <Body>
         <ButtonContainer>
-          <StyleButton onClick={() => loadData('showData')}>All Member</StyleButton>
-          <StyleButton onClick={()=> loadData('showEvent') }>Event</StyleButton>
+          <StyleButton onClick={() => {loadData('showData', 'All member',1);setPage(1);}}>All Member</StyleButton>
+          <StyleButton onClick={()=> {loadData('showEvent', 'All Event',1);setPage(1);}}>Event</StyleButton>
         </ButtonContainer>
         <DataContainer>
           <Title>
@@ -173,7 +221,7 @@ const MemberShipTable = () => {
               <h3>{title}</h3>
             </H1>
           </Title>
-          <Tablecontainer>
+          <Tablecontainer ref={containerRef}>
                 {showTable && (
                   <TableElement>
                     <thead>

@@ -134,7 +134,11 @@ def upLoadEvent():
 @gehomeServer.route('/showData', methods=["GET"])
 def showAllMember():
     try:
-        sql = 'SELECT * FROM members2'
+        page_size = 50  # 每頁顯示 100 條
+        page = int(request.args.get('page', 1))  # 獲取頁碼，默認第 1 頁
+        offset = (page - 1) * page_size
+
+        sql = f'SELECT * FROM members2 LIMIT {page_size} OFFSET {offset}'
         connection = getDbConnection(db_config)
         if connection is None:
             return jsonify({'Error': 'Database connection failed'}), 500
@@ -157,8 +161,12 @@ def showAllMember():
 # SHOW EVENT
 @gehomeServer.route('/showEvent', methods=["GET"])
 def showEvent():
+    page_size = 50
+    page = int(request.args.get("page",1))
+    offSet = (page -1) * page_size
+
     try:
-        sql= ('SELECT * FROM eventRecord')
+        sql= (f'SELECT * FROM eventRecord LIMIT {page_size} OFFSET {offSet}')
         connector = getDbConnection(db_config)
         if connector is None:
             return jsonify({"Error":"unable to connect databasic"}), 500
