@@ -185,6 +185,30 @@ def showEvent():
         if connector:
             connector.close()
 
+#Search------------------------------------------------------------------------
+@gehomeServer.route('/Search', methods=['Post'])
+def handleDataSearch():
+    Title = request.args.get('Title', None)
+    Table = request.args.get('Table', None)
+    tryData = request.args.get('Data', None)
+    Data = int(tryData) if tryData and tryData.isdigit() else tryData
+
+    try:
+        sql = (f'SELECT * FROM {Table} WHERE {Title} = %s')
+        connector = getDbConnection(db_config)
+        if connector is None:
+            return jsonify({'Fail to connect to the DB!!'})
+
+        with connector.cursor(dictionary=True) as cursor:
+            cursor.execute(sql,(Data,))
+            data = cursor.fetchall()
+            columnTitle = ['ID','中文姓名', '主管確認資格', '任職公司(S)', '任職公司(原)', '備註', '入會日期(月/日/年)', '出生日期(原)', '出生日期TEST', '員工號碼', '回鄉證號碼', '外文姓名', '家屬姓名', '家屬電話', '年齡', '性別', '推薦人任職公司', '推薦人博企員工號碼', '推薦人回鄉證號碼', '推薦人姓名', '推薦人會員編號', '推薦人職位', '推薦人身份證號碼', '會員來源', '會員是推薦人的', '會員類形', '確認資料齊全及無誤', '經手人', '職位', '職業', '資料更新日期', '身份證號碼', '附件', '電話', '願意收取訊息']
+            row = [{col:row[col]for col in columnTitle} for row in data]
+            return jsonify({"data":row, "columnTitle":columnTitle})
+
+    except Exception as e:
+        return jsonify({"Error":str(e)})
+
 ##Register~~~~~~~~~~~~~~~
 @gehomeServer.route('/Register',methods=['GET','POST'])
 @cross_origin(origins="http://localhost:3000")
