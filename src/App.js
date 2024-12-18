@@ -9,6 +9,7 @@ import Login from './Login';
 import ProtectedRoute from './ProtectedRoute';
 import SelectPage from './selectPage';
 import UploadPage from './uploadPage';
+import Search from './search';
 
 //CSS------------------------------
 
@@ -24,6 +25,7 @@ function Homepage() {
           <Route path ="/showDataPage" element = {<ProtectedRoute><Inside/></ProtectedRoute>}/>
           <Route path ="/selectPage" element = {<SelectPage/>}/>
           <Route path ="/uploadPage" element = {<UploadPage/>}/>
+          <Route path='/test' element = {<Search/>}/>
         </Routes>
     </div>
     </Router>

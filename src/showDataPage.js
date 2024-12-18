@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import StatesBar from './stateBar';
+import Search from './search';
 
 const MainContainer = styled.div`
   display: flex;
@@ -89,7 +90,8 @@ const Title = styled.div`
 `;
 
 const H1 = styled.div`
-  text-align: center;
+  display: flex;
+  flex-direction: row;
   grid-column: 2;
 `;
 const H2 = styled.div`
@@ -158,6 +160,7 @@ const MemberShipTable = () => {
       .then((response) => {
         const newData = response.data.data;
       if (page === 1) {
+        setHasMore(true);
         setColumnTitle(response.data.columnTitle);
         setData(newData);
       }else{
@@ -188,6 +191,12 @@ const MemberShipTable = () => {
     }
   };
 
+  const handleSearch = ({data,columnTitle}) => {
+    setColumnTitle(columnTitle);
+    setData(data);
+    setHasMore(false);
+  };
+
   useEffect(()=>{
     if (page > 1){
     loadData(switchPage,title,page)
@@ -207,9 +216,10 @@ const MemberShipTable = () => {
     }
   }, [hasMore]);
 
+
   return (
     <MainContainer>
-      <Top><StatesBar /></Top>
+      <Top><StatesBar/></Top>
       <Body>
         <ButtonContainer>
           <StyleButton onClick={() => {loadData('showData', 'All member',1);setPage(1);}}>All Member</StyleButton>
@@ -218,6 +228,7 @@ const MemberShipTable = () => {
         <DataContainer>
           <Title>
             <H1>
+          <Search onSearch={handleSearch}></Search>
               <h3>{title}</h3>
             </H1>
           </Title>
