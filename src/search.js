@@ -37,13 +37,15 @@ const Search = ({onSearch}) => {
                     <div>        
                         <label htmlFor="Title">請輸入表頭</label>
                         <br></br>
-                        <input
+                        <select
                         id="Title" 
                         type="text"
                         placeholder="Title"
                         value={con1}
                         onChange={(e) => setCon1(e.target.value)}
-                        />
+                        >
+                            <option></option>
+                        </select>
                     </div>
                     <div>
                         <label htmlFor="Data">請輸入內容</label>
