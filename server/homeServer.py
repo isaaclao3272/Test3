@@ -15,7 +15,7 @@ from io import StringIO, BytesIO
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Skylovesk2',
+    'password': 'Abc1234567',
     'database': 'member_db',    
 }
 
