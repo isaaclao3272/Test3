@@ -25,7 +25,7 @@ gehomeServer.config['JWT_SECRET_KEY'] = 'UAcSIZC2sA2mhJ2jQ3Yn2OyZOiCOvIlqLbb-_4d
 jwt = JWTManager(gehomeServer)
 CORS(gehomeServer, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"], "supports_credentials": True}})
 
-DATABASE_URI = 'mysql+pymysql://root:Skylovesk2@localhost/member_db'
+DATABASE_URI = 'mysql+pymysql://root:Abc123456@localhost/member_db'
 engine = create_engine(DATABASE_URI)
 gehomeServer.config['SQLALCHEMY_DATABASE_URI']=DATABASE_URI
 gehomeServer.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
